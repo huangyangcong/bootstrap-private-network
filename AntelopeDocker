@@ -81,7 +81,7 @@ RUN apt-get -y update && apt-get install -y  \
 	cmake             \
 	git               \
 	curl              \
-	libcurl4-openssl-dev \
+    libcurl4-gnutls-dev \
 	libgmp-dev        \
 	libssl-dev        \
 	llvm-11-dev       \

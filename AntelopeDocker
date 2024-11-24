@@ -1,0 +1,137 @@
+FROM ubuntu:22.04 AS build-install-stage
+RUN apt-get -y update && apt-get install -y  \
+        build-essential   \
+        cmake             \
+        git               \
+        curl              \
+        libcurl4-openssl-dev \
+        libgmp-dev        \
+        libssl-dev        \
+        llvm-11-dev       \
+        python3-numpy     \
+        file              \
+        gdb               \
+        zlib1g-dev        \
+        clang             \
+        clang-tidy        \
+        libxml2-dev       \
+        opam ocaml-interp \
+        python3           \
+        python3-pip       \
+        vim               \
+        time              \
+        jq                \
+        apt-get clean &&  \
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN python3 -m pip install pygments
+RUN mkdir -p /local/eosnetworkfoundation
+RUN mkdir -p /bigata1/log
+RUN mkdir -p /bigata1/savanna/nodeos-one
+RUN mkdir -p /bigata1/savanna/nodeos-two
+RUN mkdir -p /bigata1/savanna/nodeos-three
+RUN chmod 777 /local/eosnetworkfoundation
+RUN chmod 777 /bigata1/log
+RUN chmod 777 /bigata1/savanna
+RUN chmod 777 /bigata1/savanna/nodeos-one
+RUN chmod 777 /bigata1/savanna/nodeos-two
+RUN chmod 777 /bigata1/savanna/nodeos-three
+RUN echo 'root:Docker!' | chpasswd
+RUN useradd -ms /bin/bash enfuser
+USER enfuser
+WORKDIR /local/eosnetworkfoundation
+RUN mkdir /local/eosnetworkfoundation/repos
+WORKDIR /local/eosnetworkfoundation/repos
+RUN git clone -b release/1.0 --single-branch https://github.com/AntelopeIO/spring.git
+RUN git clone -b release/4.1 --single-branch https://github.com/AntelopeIO/cdt.git
+RUN git clone https://github.com/AntelopeIO/reference-contracts.git
+RUN git clone https://github.com/eosnetworkfoundation/eos-system-contracts.git
+RUN git clone --single-branch https://github.com/huangyangcong/bootstrap-private-network.git
+RUN git clone https://github.com/eosnetworkfoundation/eosio.time
+WORKDIR /local/eosnetworkfoundation/repos/bootstrap-private-network
+# Build uses the following
+# SPRING_GIT_COMMIT_TAG=${1:-v1.0.1}
+# CDT_GIT_COMMIT_TAG=${2:-v4.1.0}
+RUN /local/eosnetworkfoundation/repos/bootstrap-private-network/bin/build_antelope_software.sh
+USER root
+RUN /local/eosnetworkfoundation/repos/bootstrap-private-network/bin/install_antelope_software.sh
+EXPOSE 8888
+USER enfuser
+RUN /local/eosnetworkfoundation/repos/bootstrap-private-network/bin/build_eos_contracts.sh
+# preserve packages
+RUN mkdir /local/eosnetworkfoundation/software
+RUN mkdir /local/eosnetworkfoundation/software/spring
+RUN mkdir /local/eosnetworkfoundation/software/cdt
+RUN mv /local/eosnetworkfoundation/spring_build/antelope-spring_*.deb /local/eosnetworkfoundation/software/spring
+RUN mv /local/eosnetworkfoundation/repos/cdt/build/tools/bin /local/eosnetworkfoundation/software/cdt
+RUN mv /local/eosnetworkfoundation/repos/cdt/build/packages/cdt_*_amd64.deb /local/eosnetworkfoundation/software/cdt
+
+RUN rm -rf /local/eosnetworkfoundation/repos/spring/.git/modules
+RUN find /local/eosnetworkfoundation/repos/spring/ -name "build" -type d | xargs rm -rf
+RUN rm -rf /local/eosnetworkfoundation/repos/cdt/build
+RUN rm -rf rm -rf /local/eosnetworkfoundation/spring_build/
+RUN rm -rf /local/eosnetworkfoundation/repos/cdt
+RUN rm -rf /local/eosnetworkfoundation/repos/spring
+
+FROM ubuntu:22.04
+
+RUN apt-get -y update && apt-get install -y  \
+	build-essential   \
+	cmake             \
+	git               \
+	curl              \
+	libcurl4-openssl-dev \
+	libgmp-dev        \
+	libssl-dev        \
+	llvm-11-dev       \
+	python3-numpy     \
+	file              \
+	gdb               \
+	zlib1g-dev        \
+	clang             \
+	clang-tidy        \
+	libxml2-dev       \
+	opam ocaml-interp \
+	python3           \
+	python3-pip       \
+	vim               \
+	time              \
+	jq            &&  \
+	apt-get clean &&  \
+	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN python3 -m pip install pygments
+RUN mkdir -p /local/eosnetworkfoundation
+RUN mkdir -p /bigata1/log
+RUN mkdir -p /bigata1/savanna/nodeos-one
+RUN mkdir -p /bigata1/savanna/nodeos-two
+RUN mkdir -p /bigata1/savanna/nodeos-three
+RUN chmod 777 /local/eosnetworkfoundation
+RUN chmod 777 /bigata1/log
+RUN chmod 777 /bigata1/savanna
+RUN chmod 777 /bigata1/savanna/nodeos-one
+RUN chmod 777 /bigata1/savanna/nodeos-two
+RUN chmod 777 /bigata1/savanna/nodeos-three
+
+RUN echo 'root:Docker!' | chpasswd
+RUN useradd -ms /bin/bash enfuser
+
+USER enfuser
+WORKDIR /local/eosnetworkfoundation
+RUN mkdir /local/eosnetworkfoundation/software
+WORKDIR /local/eosnetworkfoundation/software
+COPY --from=build-install-stage /local/eosnetworkfoundation/software/spring/*.deb .
+COPY --from=build-install-stage /local/eosnetworkfoundation/software/cdt/*.deb .
+
+USER root
+RUN dpkg -i /local/eosnetworkfoundation/software/*.deb
+EXPOSE 8888
+
+USER enfuser
+WORKDIR /local/eosnetworkfoundation
+RUN mkdir /local/eosnetworkfoundation/repos
+WORKDIR /local/eosnetworkfoundation/repos
+COPY --from=build-install-stage /local/eosnetworkfoundation/repos/reference-contracts .
+COPY --from=build-install-stage /local/eosnetworkfoundation/repos/eos-system-contracts .
+COPY --from=build-install-stage /local/eosnetworkfoundation/repos/bootstrap-private-network .
+COPY --from=build-install-stage /local/eosnetworkfoundation/repos/eosio.time .

@@ -39,9 +39,11 @@ RUN chmod 777 /bigata1/savanna/nodeos-two
 RUN chmod 777 /bigata1/savanna/nodeos-three
 RUN echo 'root:Docker!' | chpasswd
 RUN useradd -ms /bin/bash enfuser
-USER enfuser
+USER root
 WORKDIR /local/eosnetworkfoundation
 RUN wget https://github.com/AntelopeIO/cdt/releases/download/v4.1.0/cdt_4.1.0-1_amd64.deb && dpkg -i cdt_*_.deb
+USER enfuser
+WORKDIR /local/eosnetworkfoundation
 RUN mkdir /local/eosnetworkfoundation/repos
 WORKDIR /local/eosnetworkfoundation/repos
 RUN git clone -b release/1.0 --single-branch https://github.com/AntelopeIO/spring.git

@@ -42,7 +42,7 @@ RUN useradd -ms /bin/bash enfuser
 USER root
 WORKDIR /local/eosnetworkfoundation
 RUN wget https://github.com/AntelopeIO/cdt/releases/download/v4.1.0/cdt_4.1.0-1_amd64.deb
-RUN dpkg -i ./cdt_*_.deb
+RUN dpkg -i ./cdt_*.deb
 USER enfuser
 WORKDIR /local/eosnetworkfoundation
 RUN mkdir /local/eosnetworkfoundation/repos

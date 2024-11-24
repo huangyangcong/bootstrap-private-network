@@ -51,6 +51,6 @@ cd build || exit
 export spring_DIR="$SPRING_BUILD_DIR"/lib/cmake/spring
 cmake .. >>"$LOG_DIR"/cdt_build_log.log 2>&1
 make -j ${NPROC} >>"$LOG_DIR"/cdt_build_log.log 2>&1
-cd packages
+cd packages || exit
 ./generate_package.sh deb ubuntu-22.04 amd64
 echo "FINSIHED BUILDING CDT"

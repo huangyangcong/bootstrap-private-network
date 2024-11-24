@@ -77,31 +77,11 @@ RUN rm -rf /local/eosnetworkfoundation/repos/spring
 FROM ubuntu:22.04
 
 RUN apt-get -y update && apt-get install -y  \
-	build-essential   \
-	cmake             \
-	git               \
-	curl              \
     libcurl4-gnutls-dev \
-	libgmp-dev        \
-	libssl-dev        \
-	llvm-11-dev       \
-	python3-numpy     \
-	file              \
-	gdb               \
-	zlib1g-dev        \
-	clang             \
-	clang-tidy        \
-	libxml2-dev       \
-	opam ocaml-interp \
-	python3           \
-	python3-pip       \
-	vim               \
-	time              \
-	jq            &&  \
-	apt-get clean &&  \
-	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    jq            &&  \
+    apt-get clean &&  \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN python3 -m pip install pygments
 RUN mkdir -p /local/eosnetworkfoundation
 RUN mkdir -p /bigata1/log
 RUN mkdir -p /bigata1/savanna/nodeos-one
@@ -121,8 +101,8 @@ USER enfuser
 WORKDIR /local/eosnetworkfoundation
 RUN mkdir /local/eosnetworkfoundation/software
 WORKDIR /local/eosnetworkfoundation/software
-COPY --from=build-install-stage /local/eosnetworkfoundation/software/spring/*.deb .
-COPY --from=build-install-stage /local/eosnetworkfoundation/software/cdt/*.deb .
+COPY --from=build-install-stage /local/eosnetworkfoundation/software/spring/*.deb ./
+COPY --from=build-install-stage /local/eosnetworkfoundation/software/cdt/*.deb ./
 
 USER root
 RUN dpkg -i /local/eosnetworkfoundation/software/*.deb
@@ -132,7 +112,7 @@ USER enfuser
 WORKDIR /local/eosnetworkfoundation
 RUN mkdir /local/eosnetworkfoundation/repos
 WORKDIR /local/eosnetworkfoundation/repos
-COPY --from=build-install-stage /local/eosnetworkfoundation/repos/reference-contracts .
-COPY --from=build-install-stage /local/eosnetworkfoundation/repos/eos-system-contracts .
-COPY --from=build-install-stage /local/eosnetworkfoundation/repos/bootstrap-private-network .
-COPY --from=build-install-stage /local/eosnetworkfoundation/repos/eosio.time .
+COPY --from=build-install-stage /local/eosnetworkfoundation/repos/reference-contracts ./reference-contracts/
+COPY --from=build-install-stage /local/eosnetworkfoundation/repos/eos-system-contracts ./eos-system-contracts/
+COPY --from=build-install-stage /local/eosnetworkfoundation/repos/bootstrap-private-network ./bootstrap-private-network/
+COPY --from=build-install-stage /local/eosnetworkfoundation/repos/eosio.time ./eosio.time/

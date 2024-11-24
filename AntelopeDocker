@@ -1,5 +1,6 @@
 FROM ubuntu:22.04 AS build-install-stage
 RUN apt-get -y update && apt-get install -y  \
+        wget \
         build-essential   \
         cmake             \
         git               \
@@ -20,6 +21,7 @@ RUN apt-get -y update && apt-get install -y  \
         python3-pip       \
         vim               \
         time              \
+        libcurl4-gnutls-dev \
         jq            &&  \
         apt-get clean &&  \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -40,6 +42,7 @@ RUN echo 'root:Docker!' | chpasswd
 RUN useradd -ms /bin/bash enfuser
 USER enfuser
 WORKDIR /local/eosnetworkfoundation
+RUN wget https://github.com/AntelopeIO/cdt/releases/download/v4.1.0/cdt_4.1.0-1_amd64.deb && dpkg -i cdt_*_.deb
 RUN mkdir /local/eosnetworkfoundation/repos
 WORKDIR /local/eosnetworkfoundation/repos
 RUN git clone -b release/1.0 --single-branch https://github.com/AntelopeIO/spring.git

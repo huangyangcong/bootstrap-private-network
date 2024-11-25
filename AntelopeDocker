@@ -107,6 +107,7 @@ COPY --link --from=build-install-stage /local/eosnetworkfoundation/software/cdt/
 
 USER root
 RUN dpkg -i /local/eosnetworkfoundation/software/*.deb
+RUN rm -f /local/eosnetworkfoundation/software/*.deb
 EXPOSE 8888
 
 USER enfuser

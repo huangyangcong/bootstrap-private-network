@@ -100,21 +100,19 @@ RUN useradd -ms /bin/bash enfuser
 
 USER enfuser
 WORKDIR /local/eosnetworkfoundation
-RUN mkdir /local/eosnetworkfoundation/software
-WORKDIR /local/eosnetworkfoundation/software
-COPY --link --from=build-install-stage /local/eosnetworkfoundation/software/spring/*.deb ./
-COPY --link --from=build-install-stage /local/eosnetworkfoundation/software/cdt/*.deb ./
-
-USER root
-RUN dpkg -i /local/eosnetworkfoundation/software/*.deb
-RUN rm -f /local/eosnetworkfoundation/software/*.deb
-EXPOSE 8888
-
-USER enfuser
-WORKDIR /local/eosnetworkfoundation
 RUN mkdir /local/eosnetworkfoundation/repos
 WORKDIR /local/eosnetworkfoundation/repos
 COPY --from=build-install-stage /local/eosnetworkfoundation/repos/reference-contracts ./reference-contracts/
 COPY --from=build-install-stage /local/eosnetworkfoundation/repos/eos-system-contracts ./eos-system-contracts/
 COPY --from=build-install-stage /local/eosnetworkfoundation/repos/bootstrap-private-network ./bootstrap-private-network/
 COPY --from=build-install-stage /local/eosnetworkfoundation/repos/eosio.time ./eosio.time/
+
+RUN mkdir /local/eosnetworkfoundation/software
+WORKDIR /local/eosnetworkfoundation/software
+COPY --from=build-install-stage /local/eosnetworkfoundation/software/spring/*.deb ./
+COPY --from=build-install-stage /local/eosnetworkfoundation/software/cdt/*.deb ./
+
+USER root
+RUN dpkg -i /local/eosnetworkfoundation/software/*.deb
+RUN rm -f /local/eosnetworkfoundation/software/*.deb
+EXPOSE 8888

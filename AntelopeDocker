@@ -101,8 +101,8 @@ USER enfuser
 WORKDIR /local/eosnetworkfoundation
 RUN mkdir /local/eosnetworkfoundation/software
 WORKDIR /local/eosnetworkfoundation/software
-COPY --from=build-install-stage /local/eosnetworkfoundation/software/spring/*.deb ./
-COPY --from=build-install-stage /local/eosnetworkfoundation/software/cdt/*.deb ./
+COPY --link --from=build-install-stage /local/eosnetworkfoundation/software/spring/*.deb ./
+COPY --link --from=build-install-stage /local/eosnetworkfoundation/software/cdt/*.deb ./
 
 USER root
 RUN dpkg -i /local/eosnetworkfoundation/software/*.deb

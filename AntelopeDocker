@@ -78,6 +78,7 @@ FROM ubuntu:22.04
 
 RUN apt-get -y update && apt-get install -y  \
     libcurl4-gnutls-dev \
+    curl            &&  \
     jq            &&  \
     apt-get clean &&  \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

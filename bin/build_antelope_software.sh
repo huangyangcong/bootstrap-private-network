@@ -53,5 +53,53 @@ cmake .. >>"$LOG_DIR"/cdt_build_log.log 2>&1
 make -j ${NPROC} >>"$LOG_DIR"/cdt_build_log.log 2>&1
 cd packages || exit
 chmod -R +x .
-./generate_package.sh deb ubuntu-22.04 amd64
+
+OS=$(uname)
+ARCH=$(uname -m)
+case "$OS" in
+Linux)
+	if [ -f /etc/os-release ]; then
+		. /etc/os-release
+		case "$ID" in
+		centos)
+			if [[ "$ARCH" == "x86_64" ]]; then
+				./generate_package.sh rpm centos-$CDT_GIT_COMMIT_TAG amd64
+			elif [[ "$ARCH" == "aarch64" ]]; then
+				./generate_package.sh rpm centos-$CDT_GIT_COMMIT_TAG arm64
+			else
+				echo "Unsupported architecture: $ARCH"
+			fi
+			;;
+		ubuntu)
+			if [[ "$ARCH" == "x86_64" ]]; then
+				./generate_package.sh deb ubuntu-$CDT_GIT_COMMIT_TAG amd64
+			elif [[ "$ARCH" == "aarch64" ]]; then
+				./generate_package.sh deb ubuntu-$CDT_GIT_COMMIT_TAG arm64
+			else
+				echo "Unsupported architecture: $ARCH"
+			fi
+			;;
+		*)
+			echo "Unsupported Linux distribution: $ID"
+			;;
+		esac
+	else
+		echo "Unknown Linux distribution."
+	fi
+	;;
+Darwin)
+	# macOS
+	if [[ "$ARCH" == "x86_64" ]]; then
+		./generate_package.sh brew mac-$CDT_GIT_COMMIT_TAG amd64
+	elif [[ "$ARCH" == "arm64" ]]; then
+		./generate_package.sh brew mac-$CDT_GIT_COMMIT_TAG arm64
+	else
+		echo "Unsupported architecture: $ARCH"
+	fi
+	;;
+*)
+	echo "Unsupported operating system: $OS"
+	;;
+esac
+
 echo "FINSIHED BUILDING CDT"

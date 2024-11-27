@@ -114,5 +114,4 @@ COPY --from=build-install-stage /local/eosnetworkfoundation/software/cdt/*.deb .
 
 USER root
 RUN dpkg -i /local/eosnetworkfoundation/software/*.deb
-RUN rm -f /local/eosnetworkfoundation/software/*.deb
 EXPOSE 8888

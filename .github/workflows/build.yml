@@ -54,8 +54,22 @@ jobs:
           context: .
           file: AntelopeDocker
           platforms: linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-final
           labels: ${{ steps.meta.outputs.labels }}
-          #target: clean-out-stage
+
+      - name: Create output directory
+        run: mkdir -p output
+
+      - name: Copy artifacts from Docker container
+        run: |
+          docker create --name temp-container ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-final:latest
+          docker cp temp-container:/local/eosnetworkfoundation/software/. output/
+          docker rm temp-container
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-artifacts
+          path: output/*
